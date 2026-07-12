@@ -1,0 +1,801 @@
+{
+  "dataset": {
+    "total_contracts": 5638,
+    "yes_count": 2852,
+    "no_count": 2786,
+    "yes_rate": 0.5059
+  },
+  "model_calibration": {
+    "t_minus_2min": [
+      {
+        "model_prob_bucket": 0.0,
+        "actual_yes_rate": 0.0,
+        "ci_low": 0,
+        "ci_high": 0.0054,
+        "n": 710,
+        "calibration_error": 0.0
+      },
+      {
+        "model_prob_bucket": 0.1,
+        "actual_yes_rate": 0.0,
+        "ci_low": 0,
+        "ci_high": 0.0078,
+        "n": 490,
+        "calibration_error": 0.1
+      },
+      {
+        "model_prob_bucket": 0.2,
+        "actual_yes_rate": 0.0022,
+        "ci_low": 0.0004,
+        "ci_high": 0.0122,
+        "n": 459,
+        "calibration_error": 0.1978
+      },
+      {
+        "model_prob_bucket": 0.3,
+        "actual_yes_rate": 0.02,
+        "ci_low": 0.0106,
+        "ci_high": 0.0376,
+        "n": 450,
+        "calibration_error": 0.28
+      },
+      {
+        "model_prob_bucket": 0.4,
+        "actual_yes_rate": 0.1411,
+        "ci_low": 0.1126,
+        "ci_high": 0.1752,
+        "n": 475,
+        "calibration_error": 0.2589
+      },
+      {
+        "model_prob_bucket": 0.5,
+        "actual_yes_rate": 0.5924,
+        "ci_low": 0.549,
+        "ci_high": 0.6345,
+        "n": 503,
+        "calibration_error": 0.0924
+      },
+      {
+        "model_prob_bucket": 0.6,
+        "actual_yes_rate": 0.8847,
+        "ci_low": 0.8538,
+        "ci_high": 0.9097,
+        "n": 503,
+        "calibration_error": 0.2847
+      },
+      {
+        "model_prob_bucket": 0.7,
+        "actual_yes_rate": 0.973,
+        "ci_low": 0.9544,
+        "ci_high": 0.9842,
+        "n": 482,
+        "calibration_error": 0.273
+      },
+      {
+        "model_prob_bucket": 0.8,
+        "actual_yes_rate": 0.9955,
+        "ci_low": 0.9836,
+        "ci_high": 0.9988,
+        "n": 440,
+        "calibration_error": 0.1955
+      },
+      {
+        "model_prob_bucket": 0.9,
+        "actual_yes_rate": 0.998,
+        "ci_low": 0.9887,
+        "ci_high": 0.9996,
+        "n": 497,
+        "calibration_error": 0.098
+      },
+      {
+        "model_prob_bucket": 1.0,
+        "actual_yes_rate": 1.0,
+        "ci_low": 0.9939,
+        "ci_high": 1.0,
+        "n": 629,
+        "calibration_error": 0.0
+      }
+    ],
+    "t_minus_5min": [
+      {
+        "model_prob_bucket": 0.0,
+        "actual_yes_rate": 0.0,
+        "ci_low": 0,
+        "ci_high": 0.0147,
+        "n": 258,
+        "calibration_error": 0.0
+      },
+      {
+        "model_prob_bucket": 0.1,
+        "actual_yes_rate": 0.0,
+        "ci_low": 0,
+        "ci_high": 0.0102,
+        "n": 371,
+        "calibration_error": 0.1
+      },
+      {
+        "model_prob_bucket": 0.2,
+        "actual_yes_rate": 0.0238,
+        "ci_low": 0.0133,
+        "ci_high": 0.0421,
+        "n": 462,
+        "calibration_error": 0.1762
+      },
+      {
+        "model_prob_bucket": 0.3,
+        "actual_yes_rate": 0.0541,
+        "ci_low": 0.0388,
+        "ci_high": 0.075,
+        "n": 610,
+        "calibration_error": 0.2459
+      },
+      {
+        "model_prob_bucket": 0.4,
+        "actual_yes_rate": 0.168,
+        "ci_low": 0.1426,
+        "ci_high": 0.197,
+        "n": 726,
+        "calibration_error": 0.232
+      },
+      {
+        "model_prob_bucket": 0.5,
+        "actual_yes_rate": 0.5674,
+        "ci_low": 0.5341,
+        "ci_high": 0.6002,
+        "n": 860,
+        "calibration_error": 0.0674
+      },
+      {
+        "model_prob_bucket": 0.6,
+        "actual_yes_rate": 0.8497,
+        "ci_low": 0.8224,
+        "ci_high": 0.8735,
+        "n": 752,
+        "calibration_error": 0.2497
+      },
+      {
+        "model_prob_bucket": 0.7,
+        "actual_yes_rate": 0.949,
+        "ci_low": 0.9278,
+        "ci_high": 0.9643,
+        "n": 569,
+        "calibration_error": 0.249
+      },
+      {
+        "model_prob_bucket": 0.8,
+        "actual_yes_rate": 0.981,
+        "ci_low": 0.9643,
+        "ci_high": 0.99,
+        "n": 474,
+        "calibration_error": 0.181
+      },
+      {
+        "model_prob_bucket": 0.9,
+        "actual_yes_rate": 0.9937,
+        "ci_low": 0.9772,
+        "ci_high": 0.9983,
+        "n": 316,
+        "calibration_error": 0.0937
+      },
+      {
+        "model_prob_bucket": 1.0,
+        "actual_yes_rate": 1.0,
+        "ci_low": 0.9842,
+        "ci_high": 1,
+        "n": 240,
+        "calibration_error": 0.0
+      }
+    ],
+    "t_minus_10min": [
+      {
+        "model_prob_bucket": 0.0,
+        "actual_yes_rate": 0.0189,
+        "ci_low": 0.0033,
+        "ci_high": 0.0994,
+        "n": 53,
+        "calibration_error": 0.0189
+      },
+      {
+        "model_prob_bucket": 0.1,
+        "actual_yes_rate": 0.069,
+        "ci_low": 0.0379,
+        "ci_high": 0.1223,
+        "n": 145,
+        "calibration_error": 0.031
+      },
+      {
+        "model_prob_bucket": 0.2,
+        "actual_yes_rate": 0.0681,
+        "ci_low": 0.0454,
+        "ci_high": 0.101,
+        "n": 323,
+        "calibration_error": 0.1319
+      },
+      {
+        "model_prob_bucket": 0.3,
+        "actual_yes_rate": 0.1595,
+        "ci_low": 0.1315,
+        "ci_high": 0.1922,
+        "n": 558,
+        "calibration_error": 0.1405
+      },
+      {
+        "model_prob_bucket": 0.4,
+        "actual_yes_rate": 0.2942,
+        "ci_low": 0.2679,
+        "ci_high": 0.322,
+        "n": 1091,
+        "calibration_error": 0.1058
+      },
+      {
+        "model_prob_bucket": 0.5,
+        "actual_yes_rate": 0.5148,
+        "ci_low": 0.4894,
+        "ci_high": 0.5401,
+        "n": 1488,
+        "calibration_error": 0.0148
+      },
+      {
+        "model_prob_bucket": 0.6,
+        "actual_yes_rate": 0.7623,
+        "ci_low": 0.7349,
+        "ci_high": 0.7877,
+        "n": 997,
+        "calibration_error": 0.1623
+      },
+      {
+        "model_prob_bucket": 0.7,
+        "actual_yes_rate": 0.8766,
+        "ci_low": 0.8461,
+        "ci_high": 0.9018,
+        "n": 535,
+        "calibration_error": 0.1766
+      },
+      {
+        "model_prob_bucket": 0.8,
+        "actual_yes_rate": 0.8915,
+        "ci_low": 0.8476,
+        "ci_high": 0.9238,
+        "n": 258,
+        "calibration_error": 0.0915
+      },
+      {
+        "model_prob_bucket": 0.9,
+        "actual_yes_rate": 0.9683,
+        "ci_low": 0.9212,
+        "ci_high": 0.9876,
+        "n": 126,
+        "calibration_error": 0.0683
+      },
+      {
+        "model_prob_bucket": 1.0,
+        "actual_yes_rate": 0.9841,
+        "ci_low": 0.9154,
+        "ci_high": 0.9972,
+        "n": 63,
+        "calibration_error": 0.0159
+      }
+    ],
+    "t_minus_15min": [
+      {
+        "model_prob_bucket": 0.0,
+        "actual_yes_rate": 0.3333,
+        "ci_low": 0.0615,
+        "ci_high": 0.7923,
+        "n": 3,
+        "calibration_error": 0.3333
+      },
+      {
+        "model_prob_bucket": 0.1,
+        "actual_yes_rate": 0.1053,
+        "ci_low": 0.0294,
+        "ci_high": 0.3139,
+        "n": 19,
+        "calibration_error": 0.0053
+      },
+      {
+        "model_prob_bucket": 0.2,
+        "actual_yes_rate": 0.1228,
+        "ci_low": 0.0608,
+        "ci_high": 0.2325,
+        "n": 57,
+        "calibration_error": 0.0772
+      },
+      {
+        "model_prob_bucket": 0.3,
+        "actual_yes_rate": 0.2365,
+        "ci_low": 0.1873,
+        "ci_high": 0.294,
+        "n": 241,
+        "calibration_error": 0.0635
+      },
+      {
+        "model_prob_bucket": 0.4,
+        "actual_yes_rate": 0.3269,
+        "ci_low": 0.3003,
+        "ci_high": 0.3547,
+        "n": 1138,
+        "calibration_error": 0.0731
+      },
+      {
+        "model_prob_bucket": 0.5,
+        "actual_yes_rate": 0.5299,
+        "ci_low": 0.5118,
+        "ci_high": 0.5479,
+        "n": 2942,
+        "calibration_error": 0.0299
+      },
+      {
+        "model_prob_bucket": 0.6,
+        "actual_yes_rate": 0.6548,
+        "ci_low": 0.624,
+        "ci_high": 0.6843,
+        "n": 953,
+        "calibration_error": 0.0548
+      },
+      {
+        "model_prob_bucket": 0.7,
+        "actual_yes_rate": 0.7945,
+        "ci_low": 0.7361,
+        "ci_high": 0.8427,
+        "n": 219,
+        "calibration_error": 0.0945
+      },
+      {
+        "model_prob_bucket": 0.8,
+        "actual_yes_rate": 0.8409,
+        "ci_low": 0.7063,
+        "ci_high": 0.9207,
+        "n": 44,
+        "calibration_error": 0.0409
+      },
+      {
+        "model_prob_bucket": 0.9,
+        "actual_yes_rate": 0.9333,
+        "ci_low": 0.7018,
+        "ci_high": 0.9881,
+        "n": 15,
+        "calibration_error": 0.0333
+      },
+      {
+        "model_prob_bucket": 1.0,
+        "actual_yes_rate": 0.7143,
+        "ci_low": 0.3589,
+        "ci_high": 0.9178,
+        "n": 7,
+        "calibration_error": 0.2857
+      }
+    ]
+  },
+  "yes_rate_by_distance_to_strike": [
+    {
+      "btc_vs_strike_pct": -2.0,
+      "actual_yes_rate": 0.0,
+      "ci_low": 0,
+      "ci_high": 0.7935,
+      "n": 1
+    },
+    {
+      "btc_vs_strike_pct": -1.75,
+      "actual_yes_rate": 0.0,
+      "ci_low": 0,
+      "ci_high": 0.6576,
+      "n": 2
+    },
+    {
+      "btc_vs_strike_pct": -1.5,
+      "actual_yes_rate": 0.0,
+      "ci_low": 0,
+      "ci_high": 0.5615,
+      "n": 3
+    },
+    {
+      "btc_vs_strike_pct": -1.25,
+      "actual_yes_rate": 0.0,
+      "ci_low": 0,
+      "ci_high": 0.4345,
+      "n": 5
+    },
+    {
+      "btc_vs_strike_pct": -1.0,
+      "actual_yes_rate": 0.0,
+      "ci_low": 0,
+      "ci_high": 0.2039,
+      "n": 15
+    },
+    {
+      "btc_vs_strike_pct": -0.75,
+      "actual_yes_rate": 0.0,
+      "ci_low": 0,
+      "ci_high": 0.05,
+      "n": 73
+    },
+    {
+      "btc_vs_strike_pct": -0.5,
+      "actual_yes_rate": 0.0,
+      "ci_low": 0,
+      "ci_high": 0.0187,
+      "n": 202
+    },
+    {
+      "btc_vs_strike_pct": -0.25,
+      "actual_yes_rate": 0.0247,
+      "ci_low": 0.017,
+      "ci_high": 0.0357,
+      "n": 1092
+    },
+    {
+      "btc_vs_strike_pct": 0.0,
+      "actual_yes_rate": 0.5195,
+      "ci_low": 0.5014,
+      "ci_high": 0.5376,
+      "n": 2918
+    },
+    {
+      "btc_vs_strike_pct": 0.25,
+      "actual_yes_rate": 0.9828,
+      "ci_low": 0.973,
+      "ci_high": 0.9891,
+      "n": 1048
+    },
+    {
+      "btc_vs_strike_pct": 0.5,
+      "actual_yes_rate": 1.0,
+      "ci_low": 0.9806,
+      "ci_high": 1,
+      "n": 194
+    },
+    {
+      "btc_vs_strike_pct": 0.75,
+      "actual_yes_rate": 1.0,
+      "ci_low": 0.9229,
+      "ci_high": 1,
+      "n": 46
+    },
+    {
+      "btc_vs_strike_pct": 1.0,
+      "actual_yes_rate": 1.0,
+      "ci_low": 0.8318,
+      "ci_high": 1,
+      "n": 19
+    },
+    {
+      "btc_vs_strike_pct": 1.25,
+      "actual_yes_rate": 1.0,
+      "ci_low": 0.7719,
+      "ci_high": 1,
+      "n": 13
+    },
+    {
+      "btc_vs_strike_pct": 1.5,
+      "actual_yes_rate": 1.0,
+      "ci_low": 0.5655,
+      "ci_high": 1,
+      "n": 5
+    },
+    {
+      "btc_vs_strike_pct": 1.75,
+      "actual_yes_rate": 1.0,
+      "ci_low": 0.2065,
+      "ci_high": 1,
+      "n": 1
+    },
+    {
+      "btc_vs_strike_pct": 3.75,
+      "actual_yes_rate": 1.0,
+      "ci_low": 0.2065,
+      "ci_high": 1,
+      "n": 1
+    }
+  ],
+  "yes_rate_by_utc_hour": [
+    {
+      "utc_hour": 0,
+      "actual_yes_rate": 0.479,
+      "ci_low": 0.4164,
+      "ci_high": 0.5423,
+      "n": 238
+    },
+    {
+      "utc_hour": 1,
+      "actual_yes_rate": 0.5063,
+      "ci_low": 0.4433,
+      "ci_high": 0.5691,
+      "n": 239
+    },
+    {
+      "utc_hour": 2,
+      "actual_yes_rate": 0.4874,
+      "ci_low": 0.4246,
+      "ci_high": 0.5506,
+      "n": 238
+    },
+    {
+      "utc_hour": 3,
+      "actual_yes_rate": 0.4917,
+      "ci_low": 0.429,
+      "ci_high": 0.5545,
+      "n": 240
+    },
+    {
+      "utc_hour": 4,
+      "actual_yes_rate": 0.4875,
+      "ci_low": 0.425,
+      "ci_high": 0.5504,
+      "n": 240
+    },
+    {
+      "utc_hour": 5,
+      "actual_yes_rate": 0.4937,
+      "ci_low": 0.4309,
+      "ci_high": 0.5567,
+      "n": 239
+    },
+    {
+      "utc_hour": 6,
+      "actual_yes_rate": 0.4911,
+      "ci_low": 0.4263,
+      "ci_high": 0.5561,
+      "n": 224
+    },
+    {
+      "utc_hour": 7,
+      "actual_yes_rate": 0.5167,
+      "ci_low": 0.4493,
+      "ci_high": 0.5836,
+      "n": 209
+    },
+    {
+      "utc_hour": 8,
+      "actual_yes_rate": 0.5592,
+      "ci_low": 0.4918,
+      "ci_high": 0.6246,
+      "n": 211
+    },
+    {
+      "utc_hour": 9,
+      "actual_yes_rate": 0.5419,
+      "ci_low": 0.4769,
+      "ci_high": 0.6054,
+      "n": 227
+    },
+    {
+      "utc_hour": 10,
+      "actual_yes_rate": 0.4748,
+      "ci_low": 0.4123,
+      "ci_high": 0.5381,
+      "n": 238
+    },
+    {
+      "utc_hour": 11,
+      "actual_yes_rate": 0.5292,
+      "ci_low": 0.4661,
+      "ci_high": 0.5914,
+      "n": 240
+    },
+    {
+      "utc_hour": 12,
+      "actual_yes_rate": 0.4706,
+      "ci_low": 0.4081,
+      "ci_high": 0.534,
+      "n": 238
+    },
+    {
+      "utc_hour": 13,
+      "actual_yes_rate": 0.5378,
+      "ci_low": 0.4744,
+      "ci_high": 0.6001,
+      "n": 238
+    },
+    {
+      "utc_hour": 14,
+      "actual_yes_rate": 0.4915,
+      "ci_low": 0.4284,
+      "ci_high": 0.5549,
+      "n": 236
+    },
+    {
+      "utc_hour": 15,
+      "actual_yes_rate": 0.5523,
+      "ci_low": 0.4889,
+      "ci_high": 0.614,
+      "n": 239
+    },
+    {
+      "utc_hour": 16,
+      "actual_yes_rate": 0.5277,
+      "ci_low": 0.4639,
+      "ci_high": 0.5905,
+      "n": 235
+    },
+    {
+      "utc_hour": 17,
+      "actual_yes_rate": 0.4458,
+      "ci_low": 0.3843,
+      "ci_high": 0.5091,
+      "n": 240
+    },
+    {
+      "utc_hour": 18,
+      "actual_yes_rate": 0.5168,
+      "ci_low": 0.4536,
+      "ci_high": 0.5795,
+      "n": 238
+    },
+    {
+      "utc_hour": 19,
+      "actual_yes_rate": 0.4917,
+      "ci_low": 0.429,
+      "ci_high": 0.5545,
+      "n": 240
+    },
+    {
+      "utc_hour": 20,
+      "actual_yes_rate": 0.5508,
+      "ci_low": 0.4871,
+      "ci_high": 0.613,
+      "n": 236
+    },
+    {
+      "utc_hour": 21,
+      "actual_yes_rate": 0.521,
+      "ci_low": 0.4577,
+      "ci_high": 0.5836,
+      "n": 238
+    },
+    {
+      "utc_hour": 22,
+      "actual_yes_rate": 0.4958,
+      "ci_low": 0.4331,
+      "ci_high": 0.5587,
+      "n": 240
+    },
+    {
+      "utc_hour": 23,
+      "actual_yes_rate": 0.4895,
+      "ci_low": 0.4265,
+      "ci_high": 0.5528,
+      "n": 237
+    }
+  ],
+  "yes_rate_by_day_of_week": [
+    {
+      "day": "Mon",
+      "actual_yes_rate": 0.5017,
+      "ci_low": 0.4684,
+      "ci_high": 0.5351,
+      "n": 861
+    },
+    {
+      "day": "Tue",
+      "actual_yes_rate": 0.5104,
+      "ci_low": 0.4771,
+      "ci_high": 0.5436,
+      "n": 864
+    },
+    {
+      "day": "Wed",
+      "actual_yes_rate": 0.5041,
+      "ci_low": 0.4707,
+      "ci_high": 0.5374,
+      "n": 861
+    },
+    {
+      "day": "Thu",
+      "actual_yes_rate": 0.4749,
+      "ci_low": 0.4395,
+      "ci_high": 0.5105,
+      "n": 756
+    },
+    {
+      "day": "Fri",
+      "actual_yes_rate": 0.5191,
+      "ci_low": 0.4835,
+      "ci_high": 0.5544,
+      "n": 761
+    },
+    {
+      "day": "Sat",
+      "actual_yes_rate": 0.5239,
+      "ci_low": 0.4882,
+      "ci_high": 0.5593,
+      "n": 754
+    },
+    {
+      "day": "Sun",
+      "actual_yes_rate": 0.507,
+      "ci_low": 0.472,
+      "ci_high": 0.542,
+      "n": 781
+    }
+  ],
+  "yes_rate_by_distance_bucket": [
+    {
+      "distance_bucket": "near (<0.25%)",
+      "actual_yes_rate": 0.5075,
+      "ci_low": 0.4942,
+      "ci_high": 0.5208,
+      "n": 5421
+    },
+    {
+      "distance_bucket": "mid (0.25-1%)",
+      "actual_yes_rate": 0.4651,
+      "ci_low": 0.3996,
+      "ci_high": 0.5318,
+      "n": 215
+    },
+    {
+      "distance_bucket": "far (>1%)",
+      "actual_yes_rate": 0.5,
+      "ci_low": 0.0945,
+      "ci_high": 0.9055,
+      "n": 2
+    }
+  ],
+  "threshold_viability": [
+    {
+      "threshold": 0.05,
+      "trade_count": 4778,
+      "win_rate": 0.9332,
+      "total_pnl": 2237.6787,
+      "avg_pnl": 0.4683
+    },
+    {
+      "threshold": 0.1,
+      "trade_count": 3963,
+      "win_rate": 0.9586,
+      "total_pnl": 1922.1716,
+      "avg_pnl": 0.485
+    },
+    {
+      "threshold": 0.15,
+      "trade_count": 3300,
+      "win_rate": 0.9745,
+      "total_pnl": 1636.4944,
+      "avg_pnl": 0.4959
+    },
+    {
+      "threshold": 0.2,
+      "trade_count": 2653,
+      "win_rate": 0.9842,
+      "total_pnl": 1316.5484,
+      "avg_pnl": 0.4962
+    },
+    {
+      "threshold": 0.25,
+      "trade_count": 2120,
+      "win_rate": 0.9896,
+      "total_pnl": 1052.0871,
+      "avg_pnl": 0.4963
+    },
+    {
+      "threshold": 0.3,
+      "trade_count": 1613,
+      "win_rate": 0.9963,
+      "total_pnl": 805.5438,
+      "avg_pnl": 0.4994
+    },
+    {
+      "threshold": 0.4,
+      "trade_count": 826,
+      "win_rate": 1.0,
+      "total_pnl": 411.1526,
+      "avg_pnl": 0.4978
+    },
+    {
+      "threshold": 0.5,
+      "trade_count": 0,
+      "win_rate": 0,
+      "total_pnl": 0,
+      "avg_pnl": 0
+    }
+  ],
+  "calibrated_regime_strategy": {
+    "description": "Only trade when model_prob > 0.65 (buy YES) or < 0.35 (buy NO)",
+    "trade_count": 3302,
+    "win_rate": 0.9746,
+    "total_pnl": 1592.5,
+    "avg_pnl": 0.4823,
+    "note": "Entry prices are approximated \u2014 real market prices needed for live validation"
+  }
+}
