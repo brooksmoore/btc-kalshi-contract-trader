@@ -18,6 +18,13 @@ from strategy.signal import evaluate_entry
 
 STRATEGY_EXPERIMENT_ID = "btc-phase1-strategy"
 
+# Near expiry the digital collapses to a step function (sigma*sqrt(T) -> 0), so fair value
+# saturates and RV-based pricing is meaningless. Only price contracts with real time left.
+# KXBTCD settle on a named date; same-day contracts are hours out (skipped), multi-day ones
+# (e.g. "Bitcoin price on Jul 17" seen on Jul 13) clear this floor.
+MIN_TTE_DAYS = 0.5
+_MIN_TTE_YEARS = MIN_TTE_DAYS / 365.0
+
 
 def _parse_close_ts(close_time: str) -> Optional[float]:
     try:
@@ -51,6 +58,8 @@ def price_and_signal_market(
     tte = tte_years(now_ts, close_ts)
     if tte is None:
         return {"action": "skip", "reason": "expired", "ticker": ticker}
+    if tte < _MIN_TTE_YEARS:
+        return {"action": "skip", "reason": f"too_short_dated (<{MIN_TTE_DAYS}d)", "ticker": ticker}
 
     if not (vol_annual and vol_annual > 0):
         return {"action": "skip", "reason": "no_vol", "ticker": ticker}
@@ -60,7 +69,7 @@ def price_and_signal_market(
         return {"action": "skip", "reason": "no_fair_value", "ticker": ticker}
 
     decision = evaluate_entry(
-        p_fair=p_fair, yes_bid=book.yes_bid, no_bid=book.no_bid, min_edge_usd=min_edge_usd
+        p_fair=p_fair, yes_bid=book.yes_bid, no_bid=book.no_bid, min_edge_usd=min_edge_usd,
     )
     decision.update({"ticker": ticker, "strike": strike, "tte_years": tte, "spot": spot_usd})
     return decision

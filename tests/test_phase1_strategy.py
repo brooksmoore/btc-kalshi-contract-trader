@@ -160,3 +160,33 @@ def test_vol_plausibility_guard_blocks_degenerate_estimates() -> None:
     assert vol_is_plausible(0.0) is False
     assert vol_is_plausible(None) is False
     assert vol_is_plausible(5.0) is False        # absurdly high
+
+
+# ── phantom-edge guards (2026-07-13 fix) ───────────────────────────────────────
+
+def test_saturated_fair_value_rejects() -> None:
+    # THE 46k-phantom case: p_fair clamped to ~0, market agrees (~0.01) → must reject, not "enter NO".
+    d = evaluate_entry(p_fair=1e-6, yes_bid=0.005, no_bid=0.985)
+    assert d["action"] == "reject" and "saturated" in d["reason"]
+
+
+def test_prob_edge_gate_rejects_when_model_agrees_with_market() -> None:
+    # model 0.52, market 0.50 → only 2 points apart → not real edge → reject (even if net_ev>0)
+    d = evaluate_entry(p_fair=0.52, yes_bid=0.49, no_bid=0.49)
+    assert d["action"] == "reject" and "prob_edge" in d["reason"]
+
+
+def test_real_disagreement_still_enters() -> None:
+    # model 0.80, market 0.55 → 25-point disagreement → genuine edge → entry
+    d = evaluate_entry(p_fair=0.80, yes_bid=0.55, no_bid=0.44)
+    assert d["action"] == "entry" and d["side"] == "yes"
+
+
+def test_runner_skips_short_dated() -> None:
+    import time
+    from strategy.runner import price_and_signal_market
+    close = time.time() + 3600  # 1 hour out < 0.5-day floor
+    mkt = {"ticker": "KXBTCD-26JUL1316-T70000", "close_time": _iso_from_ts(close)}
+    d = price_and_signal_market(mkt, _book(yes_bid=0.5, no_bid=0.5),
+                                spot_usd=70000, vol_annual=0.6, now_ts=time.time())
+    assert d["action"] == "skip" and "too_short_dated" in d["reason"]

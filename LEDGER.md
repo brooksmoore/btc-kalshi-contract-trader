@@ -78,3 +78,21 @@ decisions.ndjson so the window isn't contaminated. Verified clean-start now fail
 Also stopped + disabled the Phase-0 capture daemon (19,835 captures / 317 settlements — enough);
 kept the settle poller for resolving strategy trades. Phase 1 runner live 2026-07-12; window opens
 at first counted trade once vol is stable. No live gate, no leverage, no LLM in the pricing path.
+
+## 2026-07-13 — Phase 1 phantom-edge bug FIXED (fleet-status catch)
+
+Fleet status found the Phase-1 runner had emitted ~46k phantom entries (51/cycle). Root cause:
+on short-dated intraday KXBTCD contracts the driftless digital saturates (sigma*sqrt(T)->0 ⇒
+p_fair clamps to ~0/1), and the strategy "picked up pennies" buying the near-certain side at
+$0.99 for the maker rebate where model and market AGREE (both ~1%) — not edge, a clamp artifact.
+
+Fixed (3 gates, all fail-closed):
+- `strategy/signal.py`: probability-space edge PER SIDE from the price we'd pay (YES buy → market
+  P(YES)≈yes_bid; NO buy → ≈1-no_bid); require |p_fair - market| >= 0.05. Never depends on yes_mid
+  (deep-OTM books lack a yes_ask, which let the first fix leak 7/cycle).
+- `strategy/fair_value.py::is_saturated`: reject a clamped fair value (no real view).
+- `strategy/runner.py`: MIN_TTE_DAYS=0.5 — skip near-expiry step-function regime.
+Verified live: 51 → 7 (intermediate) → **0 entries/cycle** (52 rejects). Purged all phantom
+entries from decisions.ndjson (46,100 + 14). 19 strategy tests green. Runner restarted clean.
+The strategy now trades only a genuine >=5pt disagreement on a multi-day, non-saturated contract —
+which may be rare (efficient market), itself the honest finding the KILL_N test will measure.

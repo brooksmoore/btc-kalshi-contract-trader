@@ -35,6 +35,17 @@ def vol_is_plausible(vol_annual: Optional[float]) -> bool:
         and MIN_PLAUSIBLE_VOL_ANNUAL <= vol_annual <= MAX_PLAUSIBLE_VOL_ANNUAL
     )
 
+
+# digital_yes_prob clamps to [1e-6, 1-1e-6]. A value AT the clamp means the model has no real
+# tail estimate (it saturated) — it cannot distinguish 1e-6 from 0.02. Trading against a
+# saturated fair value is unjustified: the "edge" is an artifact of the clamp, not a view.
+_SATURATION_EPS = 1e-5
+
+
+def is_saturated(p_fair: Optional[float]) -> bool:
+    """True if the digital saturated to (near) its clamp bounds — an unreliable estimate."""
+    return p_fair is not None and (p_fair <= _SATURATION_EPS or p_fair >= 1.0 - _SATURATION_EPS)
+
 # Strike suffix on KXBTCD tickers, e.g. "KXBTCD-26JUL1016-T71799.99" -> 71799.99
 _STRIKE_RE = re.compile(r"-T(\d+(?:\.\d+)?)$")
 
