@@ -96,3 +96,14 @@ Verified live: 51 → 7 (intermediate) → **0 entries/cycle** (52 rejects). Pur
 entries from decisions.ndjson (46,100 + 14). 19 strategy tests green. Runner restarted clean.
 The strategy now trades only a genuine >=5pt disagreement on a multi-day, non-saturated contract —
 which may be rare (efficient market), itself the honest finding the KILL_N test will measure.
+
+## 2026-07-15 — STALE alarm root-caused + fixed (phase0 capture daemon was unloaded)
+Umbrella fleet-liveness flagged btc-bot STALE (state.json frozen since 2026-07-12 00:38, 3.7d).
+Root cause: `com.btcbot.phase0_capture` was NOT loaded in launchd (missing from `launchctl list`)
+— it is the only writer of data/state.json and data/captures.jsonl. The Phase-1 strategy loop
+(PID 680) was healthy the whole time (cycling every 120s, phase1_positions.jsonl fresh same-day),
+so no strategy data was lost; only the capture/snapshot stream stopped. Gap: ~3.7 days of captures
+missing (Jul 12 00:38 → Jul 15 16:48). Fix: `launchctl bootstrap gui/501 launchd/com.btcbot.phase0_capture.plist`
+— verified capture resumed (spot_ok=True, 20 markets, state.json rewritten). All three btcbot
+jobs now loaded. Open question: what unloaded it on Jul 12 (likely reboot/login race or manual
+bootout); if it recurs, add KeepAlive audit or a self-heal to fleet_liveness.

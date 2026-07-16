@@ -9,7 +9,7 @@
 - **Intelligence type:** Measurement only (spot + book + fees); no strategy edge claims yet
 - **Single most important next thing:** Phase 1 RUNNING clean (`deploy/run_phase1.py` via launchd `com.btcbot.phase1_strategy`, 120s paper loop). **2026-07-13: found + fixed a phantom-edge bug** — on short-dated contracts the digital saturated (p_fair→~0/1) and the strategy "picked up pennies" buying near-certain sides at $0.99 where model≈market (46k phantom entries, purged). Fixed with a per-side probability-edge gate (|p_fair − price| ≥ 0.05), a saturated-fair-value reject, and a 0.5-day min-TTE skip; verified **51 → 0 entries/cycle**. It now trades ONLY a genuine ≥5-point disagreement on a multi-day, non-saturated KXBTCD contract — which may be rare (efficient market), itself the honest finding. **Watch:** whether any real entry ever appears; score grey-until-KILL_N=150, FLOORED if net_ev_oos ≤ 0; on floor, successor anchor = options-implied (B). Now version-controlled: public repo `brooksmoore/btc-kalshi-contract-trader` (no secrets).
 - **Honest odds this makes money:** Low-to-moderate, unproven. The realistic prior: Kalshi BTC digitals priced by counterparties who can also compute fair value; edge requires a genuine wedge (prediction-market vs options) or Kalshi being slower. 97% backtest still **not** evidence.
-- **Last updated:** 2026-07-11 (Phase 0 closed at N=317; Phase 1 pre-registration written)
+- **Last updated:** 2026-07-15 (STALE alarm: phase0_capture daemon found unloaded since 07-12, ~3.7d capture gap; re-bootstrapped + verified. Phase-1 loop was never down.)
 - **Daemons (launchd, reboot-safe after login):**  
   - `com.btcbot.phase0_capture` — KeepAlive, every 120s, prod reads  
   - `com.btcbot.phase0_settle` — StartInterval 300s  
