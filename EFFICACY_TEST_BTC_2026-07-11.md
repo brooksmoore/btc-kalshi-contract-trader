@@ -69,5 +69,24 @@ gross-only scoring · any "edge" claim before KILL_N.
   120s loop, paper). Fail-closed: no trades until ≥20 evenly-spaced spot samples yield a
   *plausible* realized vol (10–300% annualized) — a guard added after a smoke test caught a
   degenerate seed producing a 3.46% vol and 52 phantom entries (purged; see LEDGER 2026-07-12).
-- **Window opened:** _(stamp date at first counted strategy trade)_
-- **Verdict:** _(pending — FLOORED / CONTINUE / INSUFFICIENT, with net_ev_oos and N)_
+- **Window opened:** 2026-07-14 (first post-phantom-fix counted strategy entry; pre-07-13 rows excluded).
+- **Interim scoreboard (2026-07-16):** N=2,425 settled, mean net_ev_oos=**−0.115060**/contract,
+  win%=0.91%, total net=−$279.02 — line **FLOOR (mean ≤ 0)**. 3,805 entries still open. Full
+  table: `PHASE1_SCOREBOARD.md`. Not yet stamped as final window close until open rows settle
+  (optional); settled sample already exceeds KILL_N with mean well below zero.
+- **Verdict (FINAL, 2026-07-16): 🪦 FLOORED — Anchor A (spot + realized-vol) has no edge after fees.**
+  Per the pre-registered rule (KILL_N=150 *settlements*, FLOOR if net_ev_oos ≤ 0): N=2,425 settled
+  ≫ 150, mean net_ev_oos = **−$0.1151/contract**, win 0.91%, total −$279.02 → **FLOOR** by the
+  letter of the test.
+  **Honest caveat (Claude, independently re-derived):** the 2,425 settlements are only **33 unique
+  markets re-logged ~73× each** (the Phase-1 loop re-enters the same contract every ~120s — a real
+  bug, see below). On the **33 independent markets**, mean net = **−$0.048/contract, win 9.1%**,
+  95% CI −$0.048 ± $0.104 (upper bound just crosses zero). So the floor is **unambiguous by direction
+  on every cut** (raw, deduped, and structurally — 43% of entries are ≤5¢ cheap-side "pennies" on a
+  book whose Phase-0 baseline was already −$0.007/contract), while a *clean* independent-N floor at
+  KILL_N is not separately nailed. Owner accepted the FLOOR on the totality of evidence — grinding
+  ~10 more days for statistical tidiness on a strategy negative on every cut is over-rigor. Same
+  outcome class as kalshi_bot_2.0: an honest floor is the process succeeding.
+  **Required before the successor:** the re-entry/re-logging bug MUST be fixed first, or Anchor B's
+  scoreboard inherits the same N inflation. Successor pre-registered in `EFFICACY_TEST_BTC_B_2026-07-16.md`
+  (Anchor B — options-implied / IBIT), per §4. btc-bot is NOT buried; it advances to B.

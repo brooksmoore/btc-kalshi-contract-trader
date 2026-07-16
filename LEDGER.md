@@ -107,3 +107,35 @@ missing (Jul 12 00:38 → Jul 15 16:48). Fix: `launchctl bootstrap gui/501 launc
 — verified capture resumed (spot_ok=True, 20 markets, state.json rewritten). All three btcbot
 jobs now loaded. Open question: what unloaded it on Jul 12 (likely reboot/login race or manual
 bootout); if it recurs, add KeepAlive audit or a self-heal to fleet_liveness.
+
+## 2026-07-16 — Phase-1 kill-window scoreboard (Grok; handoff from Claude)
+
+Built the join the kill test was missing. No strategy changes, no LLM, no live path.
+
+**Code**
+- `measurement/settlement.py` — `phase=` param + `realized_pnl_side` (YES/NO, reuses fee_for_role).
+- `measurement/phase1_score.py` — post-fix cutoff (2026-07-13), kill verdict, TTE buckets, MD formatter.
+- `deploy/run_phase1_settlements.py` — joins `phase1_positions.jsonl` → Kalshi `market.result` →
+  `data/phase1_settlements.jsonl` (maker, keyed by decision_id).
+- `deploy/phase1_scoreboard.py` → `PHASE1_SCOREBOARD.md`.
+- `tests/test_phase1_scoreboard.py` — fee-honest loss, FLOOR vs edge-candidate, pre-fix exclusion.
+- Suite: **34** unit tests green (`-m "not integration"`).
+
+**Real run (2026-07-16 ~20:15Z)**
+- Open considered: 6,230 post-fix entries.
+- Newly settled: **2,425** (Jul 14–15 markets resolved). Still pending: **3,805** (mostly Jul 16).
+- Mean net EV/contract: **−0.115060**. Win%: **0.91%** (22/2425). Total net: **−$279.02**.
+- Verdict: **FLOOR (mean ≤ 0)** (N ≫ KILL_N=150).
+- TTE: all 2,425 in 0.5–1d bucket — claimed min-TTE gate looks respected.
+- Penny read: **42.9%** of settled entries had entry_price ≤ $0.05; median entry $0.08.
+  Residual "pick up pennies on the cheap side of a large disagreement," not rare multi-day edges.
+- Unique tickers among settled: **33** only — cycle re-entry inflates N. Even first-per-ticker
+  mean net still negative (~−$0.048/contract).
+
+**Not done (out of scope):** loop gate, anchor B, live, de-dupe runner. Re-run settle+scoreboard
+after Jul-16 markets resolve before treating the floor as the final window close if you want the
+open 3,805 included — direction is already unambiguous on the settled set.
+
+
+## 2026-07-16 — VERDICT: Anchor A FLOORED; Anchor B pre-registered
+Grok built the Phase-1 kill-window scoreboard (join entries→settlements, fee-honest, `PHASE1_SCOREBOARD.md`). Result: N=2,425 settled, mean net_ev_oos=−$0.115/contract, win 0.91%, total −$279 → FLOOR by the pre-registered rule (KILL_N=150 settlements, ≤0). Claude independently re-derived + caveat: the 2,425 are only 33 unique markets re-logged ~73× (a real re-entry bug); on independent N=33 mean=−$0.048 (95% CI crosses zero). Floor is unambiguous by direction on every cut (43% ≤5¢ penny-entries; Phase-0 book baseline −$0.007) → owner ACCEPTED the floor. Verdict stamped in `EFFICACY_TEST_BTC_2026-07-11.md` §6. btc-bot NOT buried — advances to Anchor B (options-implied/IBIT), pre-registered in `EFFICACY_TEST_BTC_B_2026-07-16.md` (KILL_N now counts INDEPENDENT markets + requires t≥2). Prerequisite before B's window: fix the re-logging bug (`GROK_HANDOFF_PHASE1_DEDUP.md`). No live, no LLM.

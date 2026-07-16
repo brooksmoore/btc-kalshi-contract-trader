@@ -43,6 +43,38 @@ def realized_pnl_yes(
     }
 
 
+def realized_pnl_side(
+    *,
+    entry_price: float,
+    result: str,
+    side: str = "yes",
+    role: str = "taker",
+    contracts: int = 1,
+) -> dict[str, float]:
+    """Fee-honest gross/fees/net for a YES or NO long. Reuses fee_for_role (no new fee math)."""
+    side = (side or "yes").lower()
+    if side == "yes":
+        return realized_pnl_yes(
+            entry_price=entry_price, result=result, role=role, contracts=contracts
+        )
+    # NO buy: win when result==no
+    p = float(entry_price)
+    if p > 1:
+        p = p / 100.0
+    fee = fee_for_role(p, "taker" if role == "taker" else "maker", contracts=contracts)
+    if result == "no":
+        gross = (1.0 - p) * contracts
+    elif result == "yes":
+        gross = (-p) * contracts
+    else:
+        raise ValueError(f"unknown result {result}")
+    return {
+        "gross_pnl": round(gross, 6),
+        "fees": round(fee, 6),
+        "net_pnl": round(gross - fee, 6),
+    }
+
+
 def record_settlement(
     path: str | Path,
     *,
@@ -58,6 +90,7 @@ def record_settlement(
     spot_at_settle: Optional[float] = None,
     kalshi_bid: Optional[float] = None,
     kalshi_ask: Optional[float] = None,
+    phase: str = "0",
     extra: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """Append one settlement row after external price assertion."""
@@ -67,25 +100,13 @@ def record_settlement(
         kalshi_bid=kalshi_bid,
         kalshi_ask=kalshi_ask,
     )
-    if side == "yes":
-        pnl = realized_pnl_yes(
-            entry_price=entry_price, result=result, role=role, contracts=contracts
-        )
-    else:
-        # NO buy: win when result==no
-        p = float(entry_price)
-        if p > 1:
-            p = p / 100.0
-        fee = fee_for_role(p, "taker" if role == "taker" else "maker", contracts=contracts)
-        if result == "no":
-            gross = (1.0 - p) * contracts
-        else:
-            gross = (-p) * contracts
-        pnl = {
-            "gross_pnl": round(gross, 6),
-            "fees": round(fee, 6),
-            "net_pnl": round(gross - fee, 6),
-        }
+    pnl = realized_pnl_side(
+        entry_price=entry_price,
+        result=result,
+        side=side,
+        role=role,
+        contracts=contracts,
+    )
 
     row = {
         "ts": _iso_now(),
@@ -100,7 +121,7 @@ def record_settlement(
         "spot_at_entry": spot_at_entry,
         "spot_at_settle": spot_at_settle,
         **pnl,
-        "phase": "0",
+        "phase": str(phase),
     }
     if extra:
         row["extra"] = extra
