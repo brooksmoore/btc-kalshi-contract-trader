@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Write PHASE1_SCOREBOARD.md from phase1_settlements.jsonl (kill-window read).
 
+Primary unit: independent bets (one per ticker). Raw cycle N is diagnostic only.
 No network. No strategy. No live path.
 """
 
@@ -41,48 +42,51 @@ def _enrich(rows: list[dict]) -> list[dict]:
     return out
 
 
-def build_notes(stats: dict, n_entries: int) -> list[str]:
+def build_notes(
+    ind: dict,
+    raw: dict,
+    n_entries: int,
+) -> list[str]:
     notes: list[str] = []
-    n = stats.get("n") or 0
-    mean = stats.get("mean_net") or 0.0
-    penny = stats.get("penny_share_le_05")
-    uniq = stats.get("unique_tickers") or 0
-    if n_entries > 0 and uniq > 0:
+    n = ind.get("n") or 0
+    mean = ind.get("mean_net") or 0.0
+    t = ind.get("t_stat")
+    raw_n = raw.get("n") or 0
+    if raw_n > 0 and n > 0 and raw_n != n:
         notes.append(
-            f"Logged entries (post-fix)={n_entries} across ~{uniq} unique tickers in the "
-            f"settled set — re-entry of the same market each cycle inflates N vs independent bets."
+            f"Dedup: raw cycle settlements={raw_n} → independent N={n} "
+            f"(inflation ×{raw_n / n:.1f}). Primary kill uses independent only."
         )
+    if n_entries > 0:
+        notes.append(
+            f"Logged raw entries (post-fix)={n_entries}. "
+            "Going forward the runner logs at most one open position per ticker."
+        )
+    penny = ind.get("penny_share_le_05")
     if penny is not None:
         notes.append(
-            f"Share of settled entries with entry_price ≤ $0.05: {penny:.1%}. "
-            "High share + cheap entry is the residual 'pick up pennies' signature even after the "
-            "≥5pp edge gate (cheap side of a large model/market disagreement)."
+            f"Share of independent entries with entry_price ≤ $0.05: {penny:.1%}."
         )
     if n > 0:
+        t_bit = f", t={t}" if t is not None else ""
         if mean <= 0:
             notes.append(
-                f"Settled mean net {mean:.6f}/contract ≤ 0 after maker fees — "
-                "this is the honest money-result direction for anchor A so far."
+                f"Independent mean net {mean:.6f}/bet ≤ 0 after maker fees{t_bit} — "
+                "honest money-result direction for anchor A."
             )
         else:
             notes.append(
-                f"Settled mean net {mean:.6f}/contract > 0 after maker fees — "
-                "edge candidate only; no PASS until N≥150 (and ≥2 regimes)."
+                f"Independent mean net {mean:.6f}/bet > 0{t_bit} — edge candidate only "
+                "until N≥150 (and t≥2 for Anchor B)."
             )
-    by_tte = stats.get("by_tte_bucket") or {}
+    by_tte = ind.get("by_tte_bucket") or {}
     below = by_tte.get("<0.5d (below claimed gate)")
     if below and below.get("n", 0) > 0:
         notes.append(
-            f"WARNING: {below['n']} settled rows had TTE < 0.5d at entry — claimed MIN_TTE_DAYS "
-            "gate may not be binding on all logged entries (or close_time parse differs)."
-        )
-    elif n > 0 and not any(k.startswith("<0.5") for k in by_tte):
-        notes.append(
-            "No settled rows in the <0.5d TTE bucket — claimed min-TTE filter looks respected "
-            "on the settled sample."
+            f"WARNING: {below['n']} independent rows had TTE < 0.5d at entry."
         )
     notes.append(
-        "Settlement PnL never uses p_fair; result comes from Kalshi market.result; "
+        "Settlement PnL never uses p_fair; result from Kalshi market.result; "
         "fees from measurement.fees maker schedule."
     )
     return notes
@@ -91,6 +95,18 @@ def build_notes(stats: dict, n_entries: int) -> list[str]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, default=OUT_MD)
+    ap.add_argument(
+        "--raw-only",
+        action="store_true",
+        help="legacy: score raw cycle rows only (not recommended)",
+    )
+    # --independent is default; kept as explicit flag for handoff wording
+    ap.add_argument(
+        "--independent",
+        action="store_true",
+        default=True,
+        help="primary: one bet per ticker (default)",
+    )
     args = ap.parse_args()
 
     entries = load_phase1_entries(POSITIONS, require_post_fix=True)
@@ -99,19 +115,34 @@ def main() -> int:
     n_open = len(entry_ids - settled_ids)
 
     rows = _enrich(read_jsonl(SETTLEMENTS))
-    # Only score phase=1 / post-fix (settlements should already be clean)
     rows = [r for r in rows if str(r.get("phase", "1")) == "1"]
-    stats = score_settlements(rows)
-    notes = build_notes(stats, n_entries=len(entries))
-    generated = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    md = format_scoreboard_md(
-        stats,
-        generated_at=generated,
-        n_entries_post_fix=len(entries),
-        n_settled=stats["n"],
-        n_open=n_open,
-        notes=notes,
-    )
+
+    raw_stats = score_settlements(rows, independent=False)
+    if args.raw_only:
+        stats = raw_stats
+        notes = build_notes(raw_stats, raw_stats, n_entries=len(entries))
+        md = format_scoreboard_md(
+            stats,
+            generated_at=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            n_entries_post_fix=len(entries),
+            n_settled=stats["n"],
+            n_open=n_open,
+            notes=notes,
+            raw_stats=None,
+        )
+    else:
+        ind_stats = score_settlements(rows, independent=True)
+        notes = build_notes(ind_stats, raw_stats, n_entries=len(entries))
+        md = format_scoreboard_md(
+            ind_stats,
+            generated_at=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            n_entries_post_fix=len(entries),
+            n_settled=ind_stats["n"],
+            n_open=n_open,
+            notes=notes,
+            raw_stats=raw_stats,
+        )
+
     args.out.write_text(md, encoding="utf-8")
     print(md)
     print(f"\nWrote {args.out}", file=sys.stderr)

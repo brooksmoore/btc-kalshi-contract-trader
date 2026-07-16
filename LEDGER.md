@@ -136,6 +136,32 @@ Built the join the kill test was missing. No strategy changes, no LLM, no live p
 after Jul-16 markets resolve before treating the floor as the final window close if you want the
 open 3,805 included — direction is already unambiguous on the settled set.
 
+## 2026-07-16 — Phase-1 re-entry dedup (measurement integrity; Grok)
+
+Fixed the loop artifact that inflated Anchor-A N ~73×. No strategy retune, no live, no LLM,
+no Anchor-B window open.
+
+**Code**
+- `measurement/phase1_dedup.py` — `open_tickers`, `should_count_new_entry`, `independent_settlements`,
+  `t_statistic`.
+- `deploy/run_phase1.py` — at most one counted entry per ticker while unsettled; cycle log adds
+  `already_open` count. Settlements free the ticker for a later genuine signal.
+- `measurement/phase1_score.py` + `deploy/phase1_scoreboard.py` — **independent primary** (default);
+  raw cycle table kept as diagnostic only; t-stat reported.
+- `tests/test_phase1_dedup.py` — 5 cycles → 1 entry; different strike still logs; independent N
+  = unique tickers.
+- Suite: **38** unit tests green (`-m "not integration"`).
+
+**Real independent scoreboard (same settlement file, re-scored)**
+- Raw N=2,425 → **independent N=33** (unique tickers).
+- Independent mean net **−0.048185**/bet, win% **9.09%**, **t=−0.90**.
+- Verdict under honest N: **INSUFFICIENT (N=33 < 100)** — mean ≤ 0 directionally, but not a
+  KILL_N final floor on independent units. Raw inflated FLOOR remains in history only.
+- `EFFICACY_TEST_BTC_B_2026-07-16.md` §0/§7 marked fixed & verified.
+
 
 ## 2026-07-16 — VERDICT: Anchor A FLOORED; Anchor B pre-registered
 Grok built the Phase-1 kill-window scoreboard (join entries→settlements, fee-honest, `PHASE1_SCOREBOARD.md`). Result: N=2,425 settled, mean net_ev_oos=−$0.115/contract, win 0.91%, total −$279 → FLOOR by the pre-registered rule (KILL_N=150 settlements, ≤0). Claude independently re-derived + caveat: the 2,425 are only 33 unique markets re-logged ~73× (a real re-entry bug); on independent N=33 mean=−$0.048 (95% CI crosses zero). Floor is unambiguous by direction on every cut (43% ≤5¢ penny-entries; Phase-0 book baseline −$0.007) → owner ACCEPTED the floor. Verdict stamped in `EFFICACY_TEST_BTC_2026-07-11.md` §6. btc-bot NOT buried — advances to Anchor B (options-implied/IBIT), pre-registered in `EFFICACY_TEST_BTC_B_2026-07-16.md` (KILL_N now counts INDEPENDENT markets + requires t≥2). Prerequisite before B's window: fix the re-logging bug (`GROK_HANDOFF_PHASE1_DEDUP.md`). No live, no LLM.
+
+## 2026-07-16 (later) — Dedup fix + verdict CORRECTED to INSUFFICIENT
+Grok shipped the re-entry dedup (`DONE_GROK_HANDOFF_PHASE1_DEDUP.md`): runner logs ≤1 counted entry per ticker while unsettled; scoreboard's primary unit is independent (one/ticker); 38 tests green. Honest independent scoreboard: **N=33, mean −$0.048/bet, win 9.1%, t=−0.90 → INSUFFICIENT** (N<100). This CORRECTS yesterday's premature FLOORED stamp — by this test's own "no verdict before N≥100" rule, we're not entitled to a floor yet (the 2,425 was 73×-inflated re-logs). Direction is negative but the pre-registered minimum N isn't met. Resolution: A's window (opened 07-14) runs to 07-21; the fixed runner reaches N≥100 in-window (~07-20); render the real verdict at close. Anchor B does NOT open until then. Discipline over convenience.

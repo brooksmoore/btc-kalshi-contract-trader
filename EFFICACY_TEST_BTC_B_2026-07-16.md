@@ -14,6 +14,14 @@ Anchor A's N was inflated ~73× because the Phase-1 loop re-logged the SAME cont
 re-logging bug is fixed and verified** — one counted bet per genuine new market/signal, no
 re-logging an open position. Otherwise KILL_N is meaningless. (Handoff: `GROK_HANDOFF_PHASE1_DEDUP.md`.)
 
+**Status 2026-07-16: fixed & verified.**
+- Runner: `deploy/run_phase1.py` skips entry when ticker already has an unsettled counted position
+  (`measurement/phase1_dedup.py` + `should_count_new_entry`).
+- Scoreboard primary unit: independent (one per ticker); raw cycle N is diagnostic only.
+- Proof: `tests/test_phase1_dedup.py` (5 cycles → 1 entry; different strike still logs;
+  independent N = unique tickers). Real scoreboard: raw N=2425 → independent N=33.
+- Details: `umbrella/inbox/GROK_TO_CLAUDE_phase1_dedup_RESULTS.md`.
+
 ## 1. The strategy under test (ONE structurally-different anchor)
 
 - **Primary fair value (B):** **options-implied / IBIT risk-neutral digital probability** for the
@@ -72,7 +80,8 @@ scoring · any "edge" claim before KILL_N · re-logging the same market (the §0
 
 ## 7. Result (appended at window end — do not edit above)
 
-- **Prerequisite (§0) fixed & verified:** _(pending — awaiting `GROK_HANDOFF_PHASE1_DEDUP.md`)_
+- **Prerequisite (§0) fixed & verified:** **YES — 2026-07-16** (dedup runner + independent scoreboard;
+  tests green; independent N tracks unique markets). Window still closed until Brooks sign-off + B data path.
 - **Data path (B) wired:** _(pending)_
 - **Window opened:** _(pending Brooks sign-off + §0 done)_
 - **Verdict:** _(pending)_

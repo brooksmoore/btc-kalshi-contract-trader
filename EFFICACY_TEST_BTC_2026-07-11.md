@@ -90,3 +90,15 @@ gross-only scoring · any "edge" claim before KILL_N.
   **Required before the successor:** the re-entry/re-logging bug MUST be fixed first, or Anchor B's
   scoreboard inherits the same N inflation. Successor pre-registered in `EFFICACY_TEST_BTC_B_2026-07-16.md`
   (Anchor B — options-implied / IBIT), per §4. btc-bot is NOT buried; it advances to B.
+
+- **⚠️ CORRECTION (2026-07-16, later — SUPERSEDES the FLOORED stamp above): verdict is INSUFFICIENT.**
+  After Grok's dedup fix (`DONE_GROK_HANDOFF_PHASE1_DEDUP.md`), the honest independent scoreboard is
+  **N=33 markets, mean −$0.048/bet, win 9.1%, t = −0.90.** This test's OWN rule is *"no verdict of any
+  kind before N ≥ 100"* — 33 < 100 → **INSUFFICIENT.** The prior "FLOORED" was computed on 73×-inflated
+  re-logged rows and is retained only as a diagnostic footnote. Direction is negative (t = −0.90,
+  losing on average, penny-entry structure) but the pre-registered minimum N is **not met.**
+  **Resolution (honors the letter of this test):** window opened 2026-07-14, runs 7 days (→ 2026-07-21);
+  the now-fixed deduped runner accrues ~16 independent markets/day, so N crosses ≥100 in-window
+  (~2026-07-20). **Let it run; render the real verdict at window close on independent N + t-stat.**
+  No FLOOR/CONTINUE call, and Anchor B does NOT open, until that honest verdict lands. (Yesterday's
+  "accept the floor" was premature — walked back to honor the KILL_N discipline.)

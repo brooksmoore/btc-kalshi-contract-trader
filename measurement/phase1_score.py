@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
+from .phase1_dedup import independent_settlements, t_statistic
 from .store import read_jsonl
 
 # Phantom-edge purge completed 2026-07-13 — nothing earlier may enter the kill window.
@@ -124,12 +125,23 @@ def kill_verdict(*, n: int, mean_net: float) -> str:
     return "edge candidate (mean > 0, N<150 keep going)"
 
 
-def score_settlements(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """One-page numbers from Phase-1 settlement rows (already fee-honest)."""
-    n = len(rows)
+def score_settlements(
+    rows: list[dict[str, Any]],
+    *,
+    independent: bool = False,
+) -> dict[str, Any]:
+    """One-page numbers from Phase-1 settlement rows (already fee-honest).
+
+    independent=True → one row per ticker (first entry-event); primary unit going forward.
+    """
+    mode = "independent" if independent else "raw"
+    scored = independent_settlements(rows) if independent else list(rows)
+    n = len(scored)
     if n == 0:
         return {
             "n": 0,
+            "mode": mode,
+            "raw_n": len(rows),
             "mean_net": 0.0,
             "win_pct": 0.0,
             "total_net": 0.0,
@@ -137,6 +149,7 @@ def score_settlements(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "total_fees": 0.0,
             "wins": 0,
             "losses": 0,
+            "t_stat": None,
             "verdict": kill_verdict(n=0, mean_net=0.0),
             "by_side": {},
             "by_tte_bucket": {},
@@ -146,16 +159,17 @@ def score_settlements(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "penny_share_le_05": None,
         }
 
-    nets = [float(r.get("net_pnl") or 0.0) for r in rows]
-    grosses = [float(r.get("gross_pnl") or 0.0) for r in rows]
-    fees = [float(r.get("fees") or 0.0) for r in rows]
+    nets = [float(r.get("net_pnl") or 0.0) for r in scored]
+    grosses = [float(r.get("gross_pnl") or 0.0) for r in scored]
+    fees = [float(r.get("fees") or 0.0) for r in scored]
     wins = sum(1 for g in grosses if g > 0)
     losses = n - wins
     mean_net = sum(nets) / n
     total_net = sum(nets)
+    t = t_statistic(nets)
 
     by_side: dict[str, dict[str, Any]] = {}
-    for r in rows:
+    for r in scored:
         s = str(r.get("side") or "?")
         bucket = by_side.setdefault(s, {"n": 0, "net": 0.0, "wins": 0})
         bucket["n"] += 1
@@ -168,7 +182,7 @@ def score_settlements(rows: list[dict[str, Any]]) -> dict[str, Any]:
         b["net"] = round(b["net"], 6)
 
     by_tte: dict[str, dict[str, Any]] = {}
-    for r in rows:
+    for r in scored:
         label = str(r.get("tte_bucket") or tte_bucket_label(r.get("tte_days")))
         bucket = by_tte.setdefault(label, {"n": 0, "net": 0.0, "wins": 0})
         bucket["n"] += 1
@@ -180,7 +194,7 @@ def score_settlements(rows: list[dict[str, Any]]) -> dict[str, Any]:
         b["win_pct"] = round(100.0 * b["wins"] / b["n"], 2) if b["n"] else 0.0
         b["net"] = round(b["net"], 6)
 
-    prices = [float(r["entry_price"]) for r in rows if r.get("entry_price") is not None]
+    prices = [float(r["entry_price"]) for r in scored if r.get("entry_price") is not None]
     prices_sorted = sorted(prices)
     p50 = prices_sorted[len(prices_sorted) // 2] if prices_sorted else None
     mean_ep = sum(prices) / len(prices) if prices else None
@@ -188,10 +202,12 @@ def score_settlements(rows: list[dict[str, Any]]) -> dict[str, Any]:
         sum(1 for p in prices if p <= 0.05) / len(prices) if prices else None
     )
 
-    tickers = {str(r.get("ticker")) for r in rows if r.get("ticker")}
+    tickers = {str(r.get("ticker")) for r in scored if r.get("ticker")}
 
     return {
         "n": n,
+        "mode": mode,
+        "raw_n": len(rows),
         "mean_net": round(mean_net, 6),
         "win_pct": round(100.0 * wins / n, 2),
         "total_net": round(total_net, 6),
@@ -199,6 +215,7 @@ def score_settlements(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "total_fees": round(sum(fees), 6),
         "wins": wins,
         "losses": losses,
+        "t_stat": round(t, 4) if t is not None else None,
         "verdict": kill_verdict(n=n, mean_net=mean_net),
         "by_side": by_side,
         "by_tte_bucket": by_tte,
@@ -217,42 +234,64 @@ def format_scoreboard_md(
     n_settled: int,
     n_open: int,
     notes: list[str] | None = None,
+    raw_stats: dict[str, Any] | None = None,
 ) -> str:
-    """Render PHASE1_SCOREBOARD.md body."""
+    """Render PHASE1_SCOREBOARD.md body. `stats` is the primary (independent) read."""
+    mode = stats.get("mode") or "independent"
+    t_disp = stats.get("t_stat")
+    t_str = f"{t_disp:.4f}" if t_disp is not None else "n/a"
     lines = [
         "# Phase-1 kill-window scoreboard",
         "",
         f"**Generated:** {generated_at}",
         f"**Kill reference:** `EFFICACY_TEST_BTC_2026-07-11.md` (KILL_N={KILL_N}, FLOOR if mean net ≤ 0)",
         f"**Contamination cutoff:** {POST_FIX_CUTOFF_ISO} (post phantom-edge fix only)",
+        f"**Primary unit:** **{mode}** bets (one per ticker / entry-event; cycle re-logs collapsed)",
         "",
-        "## Verdict",
+        "## Verdict (independent)",
         "",
         f"**{stats['verdict']}**",
         "",
-        "## Headline numbers (fee-honest, maker role)",
+        "## Headline numbers — independent (primary)",
         "",
         "| metric | value |",
         "|--------|------:|",
-        f"| N settled (post-fix) | {stats['n']} |",
-        f"| mean net EV / contract | {stats['mean_net']:.6f} |",
+        f"| N independent (unique tickers) | {stats['n']} |",
+        f"| raw cycle settlements (inflated) | {stats.get('raw_n', '—')} |",
+        f"| mean net EV / bet | {stats['mean_net']:.6f} |",
+        f"| t-stat (mean vs 0) | {t_str} |",
         f"| win % (gross > 0) | {stats['win_pct']:.2f}% |",
         f"| total net P&L | {stats['total_net']:.6f} |",
         f"| total gross P&L | {stats['total_gross']:.6f} |",
         f"| total fees | {stats['total_fees']:.6f} |",
         f"| wins / losses | {stats['wins']} / {stats['losses']} |",
-        f"| unique tickers settled | {stats['unique_tickers']} |",
+        f"| unique tickers | {stats['unique_tickers']} |",
         f"| entry_price median | {stats['entry_price_p50']} |",
         f"| entry_price mean | {stats['entry_price_mean']} |",
         f"| share entry ≤ $0.05 | {stats['penny_share_le_05']} |",
         "",
+    ]
+    if raw_stats is not None:
+        lines += [
+            "## Raw cycle settlements (legacy / diagnostic only)",
+            "",
+            f"| N raw | {raw_stats['n']} |",
+            f"| mean net (raw) | {raw_stats['mean_net']:.6f} |",
+            f"| win % (raw) | {raw_stats['win_pct']:.2f}% |",
+            f"| verdict if scored raw | {raw_stats['verdict']} |",
+            "",
+            "_Raw N is inflated by re-logging the same open contract every cycle. Do not use for kill._",
+            "",
+        ]
+
+    lines += [
         "## Pipeline",
         "",
-        f"- Post-fix Phase-1 entries logged: **{n_entries_post_fix}**",
-        f"- Settled: **{n_settled}**",
-        f"- Still open (no market result yet): **{n_open}**",
+        f"- Post-fix Phase-1 entries logged (raw): **{n_entries_post_fix}**",
+        f"- Settled independent / raw: **{stats['n']}** / **{stats.get('raw_n', n_settled)}**",
+        f"- Still open decision_ids (no market result yet): **{n_open}**",
         "",
-        "## By side",
+        "## By side (independent)",
         "",
         "| side | N | mean net | win% | total net |",
         "|------|--:|---------:|-----:|----------:|",
@@ -266,7 +305,7 @@ def format_scoreboard_md(
 
     lines += [
         "",
-        "## By TTE at entry (claimed filter: min 0.5 day)",
+        "## By TTE at entry (independent; claimed filter: min 0.5 day)",
         "",
         "| TTE bucket | N | mean net | win% | total net |",
         "|------------|--:|---------:|-----:|----------:|",
@@ -291,7 +330,7 @@ def format_scoreboard_md(
 
     lines += [
         "",
-        "## Penny-entry / residual phantom read",
+        "## Notes",
         "",
     ]
     if notes:
@@ -305,6 +344,7 @@ def format_scoreboard_md(
         "---",
         "_Measurement only. No live orders. Settlement truth from market result + independent",
         "spot when available — never model p_fair. Fee model: measurement.fees (maker)._",
+        "_Primary N = independent bets (one per ticker). Anchor B inherits this unit._",
         "",
     ]
     return "\n".join(lines)

@@ -1,7 +1,7 @@
 # GROK_HANDOFF — Fix Phase-1 re-entry/re-logging (measurement integrity)
 
 **To:** Grok Build · **From:** Claude (auditor) · **Date:** 2026-07-16
-**Status:** paper-only measurement integrity fix. No live, no LLM, no strategy retune.
+**Status:** DONE 2026-07-16 — paper-only measurement integrity fix. No live, no LLM, no strategy retune.
 **Blocks:** Anchor B's efficacy window cannot open until this is verified
 (`EFFICACY_TEST_BTC_B_2026-07-16.md` §0).
 
