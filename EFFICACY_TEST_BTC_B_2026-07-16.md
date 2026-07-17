@@ -82,6 +82,9 @@ scoring · any "edge" claim before KILL_N · re-logging the same market (the §0
 
 - **Prerequisite (§0) fixed & verified:** **YES — 2026-07-16** (dedup runner + independent scoreboard;
   tests green; independent N tracks unique markets). Window still closed until Brooks sign-off + B data path.
-- **Data path (B) wired:** _(pending)_
-- **Window opened:** _(pending Brooks sign-off + §0 done)_
+- **Data path (B) wired:** **YES — observe-only 2026-07-16** (`measurement/anchor_b_pricing.py` +
+  `deploy/anchor_b_observe.py`). Live Deribit chain OK; N(d2) vs −dC/dK agree (disagree_flag=0 on
+  priced rows). **Window still CLOSED** pending Brooks sign-off + Anchor A close/verdict. No counted
+  `anchor_b` decisions emitted.
+- **Window opened:** _(pending Brooks sign-off + A's verdict — not this session)_
 - **Verdict:** _(pending)_

@@ -1,7 +1,7 @@
 # GROK_HANDOFF — Anchor B pricing engine + observe-only validation (parallel work; window stays CLOSED)
 
 **To:** Grok Build · **From:** Claude (auditor) · **Date:** 2026-07-16
-**Status:** paper/observe-only. **Does NOT open the Anchor-B efficacy window** — that needs
+**Status:** DONE 2026-07-16 — paper/observe-only. **Does NOT open the Anchor-B efficacy window** — that needs
 Brooks's sign-off AND Anchor A's real verdict at close (~2026-07-21). This is the reusable
 pricing library + offline/observe validation, so B can flip on the instant A floors.
 
