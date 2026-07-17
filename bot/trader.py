@@ -18,11 +18,17 @@ Integrates:
 import inspect
 import logging
 import asyncio
+import os
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Tuple
 import json
 
 logger = logging.getLogger(__name__)
+
+# Live arm confirm (token, not a credential). Phrase lives only in env values —
+# never hard-code as a secret. Mirror Multi MULTI_RH_LIVE_CONFIRM pattern.
+_BTC_LIVE_CONFIRM_ENV = "BTC_LIVE_CONFIRM"
+_BTC_LIVE_CONFIRM_PHRASE = "ARM-REAL-MONEY"
 
 
 class Trader:
@@ -39,6 +45,7 @@ class Trader:
         position_tracker,
         settings: dict,
         alerter=None,
+        paper_trade: Optional[bool] = None,
     ):
         """
         Initialize trader.
@@ -54,7 +61,23 @@ class Trader:
                 - MAX_POSITIONS: max concurrent positions
                 - CYCLE_INTERVAL: seconds between trading cycles
                 - LOG_METRICS_INTERVAL: seconds between metric logs
+            paper_trade: If False, requires env BTC_LIVE_CONFIRM=ARM-REAL-MONEY.
+                If None, inferred from kalshi_client.paper_trade (default False if missing).
         """
+        if paper_trade is None:
+            paper_trade = bool(getattr(kalshi_client, "paper_trade", False))
+        if not paper_trade:
+            confirm = os.environ.get(_BTC_LIVE_CONFIRM_ENV, "")
+            if confirm != _BTC_LIVE_CONFIRM_PHRASE:
+                raise RuntimeError(
+                    "Refusing to construct Trader with paper_trade=False: btc-bot has "
+                    "no pre-registered go-live gate. Set env "
+                    f"{_BTC_LIVE_CONFIRM_ENV}={_BTC_LIVE_CONFIRM_PHRASE!r} only after "
+                    "a written live gate is approved. Use paper_trade=True / "
+                    "deploy/run_phase1.py for the supported path."
+                )
+
+        self.paper_trade = bool(paper_trade)
         self.kalshi_client = kalshi_client
         self.strategy = strategy
         self.risk_manager = risk_manager
@@ -76,7 +99,8 @@ class Trader:
         self.markets: Dict[str, dict] = {}  # ticker -> market data
 
         logger.info(
-            f"Trader initialized: target_tickers={self.target_tickers}, "
+            f"Trader initialized: paper_trade={self.paper_trade}, "
+            f"target_tickers={self.target_tickers}, "
             f"cycle_interval={self.cycle_interval}s"
         )
 

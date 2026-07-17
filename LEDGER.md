@@ -165,3 +165,37 @@ Grok built the Phase-1 kill-window scoreboard (join entries→settlements, fee-h
 
 ## 2026-07-16 (later) — Dedup fix + verdict CORRECTED to INSUFFICIENT
 Grok shipped the re-entry dedup (`DONE_GROK_HANDOFF_PHASE1_DEDUP.md`): runner logs ≤1 counted entry per ticker while unsettled; scoreboard's primary unit is independent (one/ticker); 38 tests green. Honest independent scoreboard: **N=33, mean −$0.048/bet, win 9.1%, t=−0.90 → INSUFFICIENT** (N<100). This CORRECTS yesterday's premature FLOORED stamp — by this test's own "no verdict before N≥100" rule, we're not entitled to a floor yet (the 2,425 was 73×-inflated re-logs). Direction is negative but the pre-registered minimum N isn't met. Resolution: A's window (opened 07-14) runs to 07-21; the fixed runner reaches N≥100 in-window (~07-20); render the real verdict at close. Anchor B does NOT open until then. Discipline over convenience.
+
+## 2026-07-16 — Anchor B pricing engine + observe-only (window CLOSED)
+Built reusable Deribit → risk-neutral digital library; did **not** open the B efficacy window
+or emit counted `anchor_b` decisions (handoff fence held).
+
+**Code**
+- `measurement/anchor_b_pricing.py` — Deribit public chain fetch (certifi SSL), IV smile +
+  total-variance term interpolation, N(d2) primary, Breeden–Litzenberger −dC/dK cross-check
+  (flag if |Δ| > 0.08), fail-closed on missing/stale data.
+- `deploy/anchor_b_observe.py` — per live KXBTCD: log kalshi_mid, anchor_b_prob, gap, would_trade
+  to `data/anchor_b_observe.jsonl` with `mode=observe`, `phase=pre_window`, `counted_decision=false`.
+- `tests/test_anchor_b_pricing.py` — ITM/OTM/ATM, N(d2)≈BL on flat-vol synthetic chain, term
+  interp bounds, stale/empty fail-closed.
+- Suite: **45** unit tests green.
+
+**Live observe (one run)**
+- Deribit index ~$64,150; 848 option quotes; SSL fixed via certifi.
+- n_priced=13+ (open KXBTCD were deep OTM vs spot that session — both Kalshi mid≈0.01 and
+  B≈0; N(d2) vs BL disagree ≈1e-6, **disagree_flag=0**).
+- `would_trade=false` on samples; no umbrella decisions written.
+
+**Docs:** EFFICACY_TEST_BTC_B §7 data path → wired + observe-validated; window CLOSED.
+Results: `umbrella/inbox/GROK_TO_CLAUDE_anchor_b_pricing_RESULTS.md`.
+
+## 2026-07-16 — Quarantine legacy live runner (accidental-live channel)
+
+**What:** Hard-refuse `deploy/run_bot.py --env prod` without `--paper` (SystemExit 2; no interactive CONFIRM). `Trader.__init__` refuses `paper_trade=False` unless env `BTC_LIVE_CONFIRM=ARM-REAL-MONEY`. Phase-1 paper stack unchanged.
+**Why:** Fleet review — legacy path could place real Kalshi orders with only an input() gate; btc has no pre-registered go-live gate.
+**Verified:** `tests/test_quarantine_accidental_live.py` (5) green; phase0/phase1/anchor_b suite still green (50 with quarantine).
+**Not done:** Delete legacy files (kept as record); did not arm live.
+
+## 2026-07-16 — CLAUDE AUDIT: legacy live-runner quarantine (PASS, with one note)
+Audited Grok's quarantine (handoff DONE_CLAUDE_TO_GROK_quarantine_accidental_live.md). Verified fail-before: reverting deploy/run_bot.py + bot/trader.py → all 5 quarantine tests FAIL (refuse_legacy_live absent; Trader rejects paper_trade kwarg). Post-fix: run_bot.py --env prod (no --paper) → SystemExit(2) with no Trader built; Trader(paper_trade=False) raises without BTC_LIVE_CONFIRM=ARM-REAL-MONEY; paper construction unchanged. Phase-1 paper stack untouched; neither legacy path is launchd-scheduled (preventive). Grok's judgment (infer paper_trade from kalshi_client.paper_trade when not passed) is sound and fail-closed (a client with no paper_trade attr defaults to live→requires confirm).
+**NOTE (minor, safe-direction):** because BotRunner infers paper_trade from the client, `--env demo` (real API, NO real money) now ALSO refuses at Trader construction (client.paper_trade=False → guard fires), contrary to the handoff's "keep demo working." Immaterial in practice — the legacy run_bot demo path is unused (Phase-1 is the runner) and the block is fail-closed. Flagged for Brooks; no action taken. **Verdict: PASS.**

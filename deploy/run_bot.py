@@ -523,6 +523,26 @@ def setup_signal_handlers(runner: BotRunner, loop: asyncio.AbstractEventLoop):
             pass  # Windows doesn't support add_signal_handler
 
 
+def refuse_legacy_live(*, env: str, paper: bool) -> None:
+    """Hard-refuse legacy live prod path (no pre-registered go-live gate).
+
+    btc-bot is a paper science project. Phase-1 paper is the only supported
+    runner (`deploy/run_phase1.py`). Live via this legacy file is disabled —
+    no interactive input() (hangs under automation; not a real gate).
+    Raises SystemExit(2) so callers get a non-zero exit without building Trader.
+    """
+    if env == "prod" and not paper:
+        msg = (
+            "REFUSED: btc-bot has no pre-registered go-live gate.\n"
+            "Live trading via the legacy runner deploy/run_bot.py is disabled.\n"
+            "Use:  python deploy/run_phase1.py   (paper Phase-1 — only supported path)\n"
+            "If live is ever cleared after a written gate, arming will also require\n"
+            "env BTC_LIVE_CONFIRM=ARM-REAL-MONEY on Trader construction (not this CLI)."
+        )
+        print(msg, file=sys.stderr)
+        raise SystemExit(2)
+
+
 async def main():
     parser = argparse.ArgumentParser(
         description="Kalshi Bitcoin Trading Bot",
@@ -534,7 +554,8 @@ Examples:
   python deploy/run_bot.py --paper --strategy ensemble    # paper trade with ensemble strategy
   python deploy/run_bot.py --paper --log-level DEBUG      # verbose debug output
   python deploy/run_bot.py --env demo                     # live demo (real API, no real money)
-  python deploy/run_bot.py --env prod                     # LIVE TRADING (real money!)
+  python deploy/run_bot.py --env prod                     # LIVE TRADING — DISABLED (no go-live gate)
+  python deploy/run_phase1.py                             # supported Phase-1 paper runner
         """
     )
     parser.add_argument(
@@ -573,14 +594,8 @@ Examples:
     if args.scan_interval:
         os.environ["SCAN_INTERVAL_SECONDS"] = str(args.scan_interval)
 
-    # Safety gate for live trading
-    if args.env == "prod" and not args.paper:
-        print("\n⚠️  WARNING: You are about to run LIVE trading with REAL money on Kalshi.")
-        print("   Make sure you've run paper trading and are satisfied with performance.")
-        confirm = input("   Type 'CONFIRM' to proceed: ").strip()
-        if confirm != "CONFIRM":
-            print("Aborted.")
-            return
+    # Hard refuse legacy live prod (no input() gate — not a real money gate).
+    refuse_legacy_live(env=args.env, paper=bool(args.paper))
 
     runner = BotRunner(args)
     loop = asyncio.get_event_loop()
