@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.btcbot.m15_capture</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/bash</string>
+		<string>/Users/brooksmoore/Desktop/btc-bot/Short-term Bitcoin Contract Trader Bot/deploy/run_m15_capture_daemon.sh</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>/Users/brooksmoore/Desktop/btc-bot/Short-term Bitcoin Contract Trader Bot</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PYTHONPATH</key>
+		<string>/Users/brooksmoore/Desktop/btc-bot/Short-term Bitcoin Contract Trader Bot:/Users/brooksmoore/Desktop/umbrella</string>
+		<key>KALSHI_ENV</key>
+		<string>prod</string>
+		<key>PATH</key>
+		<string>/usr/local/bin:/usr/bin:/bin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<!-- Persistent capture-only daemon; restart if it dies, but not in a tight crash loop. -->
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>30</integer>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>StandardOutPath</key>
+	<string>/tmp/btc_m15_capture_launchd.log</string>
+	<key>StandardErrorPath</key>
+	<string>/tmp/btc_m15_capture_launchd.log</string>
+</dict>
+</plist>
