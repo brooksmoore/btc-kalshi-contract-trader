@@ -76,7 +76,7 @@
 | Stage | **S1 capture-only** (product + refs + books). Zero rests. |
 | B1 shape | **binary_brti_up_vs_open** (CF BRTI 60s avg end ≥ open) — not brackets |
 | B2 oracle | Kalshi `result` only for P&L |
-| M1/M2/M3 | LATE_REF=10s; `m15_vol`; `m15_calibration` (needs N≥30) |
+| M1/M2/M3 + lag fix | **Kill-eligible = floor_strike** (not Coinbase ≤10s); short vol; calib N≥30 |
 | Command | `python deploy/run_m15_capture.py --once` |
 | Report | `M15_S1_PRODUCT_REPORT.md` |
 | experiment_id | `btc-m15-fill-honest` |
@@ -84,6 +84,9 @@
 | Live | **OFF** |
 
 ## Recent movement
+- 2026-07-22 (retro calib): 🟢 **15m retro CALIBRATION = CALIBRATED (Claude verdict).** 478 settled 15m markets (5d) scored vs shipped calibration_gate: t2 model Brier 0.053 beats market 0.065 (t5 within slack; t1 fails — market too sharp <1min to close). Removes the CALIBRATION lock of S2. Caveats: usable horizon t2-t5 not final minute; 5d/one regime; ~$6 Coinbase-vs-BRTI basis uncorrected (upside to fix). **S2 still LOCKED** on fill-honest P&L (forward-bound) + Brooks yes. Results → `umbrella/inbox/DONE_GROK_TO_CLAUDE_btc_15m_retro_calib_RESULTS.md`.
+- 2026-07-22 (late): 📊 **15m retro calibration backfill (Grok, $0).** 478 settled KXBTC15M (07-17→07-22); Coinbase 1m PIT; calibration_gate reused. t2/t5 PASS, t1 FAIL vs sharp market; basis mean Coinbase−floor ≈ −$6. No verdict (Claude). Results → `umbrella/inbox/GROK_TO_CLAUDE_btc_15m_retro_calib_RESULTS.md`.
+- 2026-07-22 (evening): 🟢 **floor_strike kill-eligibility (Grok).** Listing lag made Coinbase ≤10s unworkable; kill path now uses Kalshi `floor_strike` (CF BRTI open). Coinbase lag diagnostic only. Live cycle: kill_eligible=1 with late Coinbase. 18 tests. S2 still locked. Results → `umbrella/inbox/GROK_TO_CLAUDE_btc_15m_floor_strike_eligibility_RESULTS.md`.
 - 2026-07-22 (later): 🟢 **15m S1 capture daemon deployed (Claude, Brooks-authorized).** `com.btcbot.m15_capture` launchd (KeepAlive, own process, isolated from daily phase1) runs `deploy/run_m15_capture_daemon.sh` → `run_m15_capture.py --interval 5`. Persistent ~5.5s loop so a newly-opened 15m market is first-seen ≤10s → earns kill-eligible `ok` refs. Verified live: PID up, exit 0, `rests:0 orders:0`, shape `binary_brti_up_vs_open all_ok=true`. Poll tightened 5s→2s. **S1 FINDING (blocker for S2):** Kalshi surfaces a 15m market ~5-10s AFTER nominal open_time, so first_seen lands at/over the 10s bar (`-1130-30`: 10.3s → `late`). Under current rules kill-N won't accrue. Fix flagged to Grok: use `floor_strike` (official CF BRTI open, immediate) as S_open → Coinbase `ok/late` gate becomes diagnostic-only. `inbox/CLAUDE_TO_GROK_btc_15m_S1_listing_lag_FINDING.md`. Log `/tmp/btc_m15_capture_launchd.log`. **Capture-only; S2 locked** (needs eligibility-rule fix + calib N≥30 + Brooks in-session yes). Live OFF.
 - 2026-07-22: 🟢 **15m S1 + Claude fixes (Grok).** Capture-only runner live; product shape confirmed binary CF BRTI up; settlement oracle locked; LATE_REF 10s; short vol + calib gate modules; 15 tests. S2 still locked. Results → `umbrella/inbox/GROK_TO_CLAUDE_btc_15m_s1_FIXES_RESULTS.md`.
 - 2026-07-21: 📋 **15m S0 scaffold (Grok).** Parallel KXBTC15M fill-honest design + pre-reg (CLOSED) + pure open-ref/fair-value modules + tests. No runner, no launchd, daily Phase 1.5 untouched. Claude eval handoff: `umbrella/inbox/GROK_TO_CLAUDE_btc_15m_scaffold_EVAL.md`.

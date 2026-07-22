@@ -43,12 +43,31 @@ the basis I flagged in the eligibility re-audit; if MISCALIBRATED, this is the f
 ## 6. Result (append only after scoring)
 | Field | Value |
 |-------|-------|
-| Backfill span / N per horizon | — |
-| Best horizon: model Brier / market Brier | — |
-| Gate PASS? | — |
-| Coinbase−floor_strike basis (mean/sd) | — |
-| **Verdict** | — |
-| Next step | — |
+| Backfill span / N per horizon | 2026-07-17 → 07-22 (5 days, dense) · t1 N=347 / t2 N=408 / t5 N=451 |
+| Best horizon: model Brier / market Brier | **t2: 0.0528 model vs 0.0649 market** (model genuinely better) |
+| Gate PASS? | **t1 FAIL** (mkt 0.027 too sharp near close) · **t2 PASS** · **t5 PASS** (0.108 vs 0.107, slack) |
+| Coinbase−floor_strike basis (mean/sd) | **−$6.37 / $30.69** (persistent ~$6 under-floor, fat tails ±$40); uncorrected |
+| **Verdict** | **🟢 CALIBRATED** (≥1 horizon meets N≥30 + gate PASS; t2 genuinely, t5 within slack) |
+| Next step | Removes the CALIBRATION lock of S2. Forward fill-honest P&L + Brooks yes remain. |
+
+### Verdict rationale (CALIBRATED — one of S2's three locks now cleared)
+- Per the frozen rule, the model clears the shipped `calibration_gate` at t2 (genuinely beats the
+  market) and t5 (within the 0.02 slack), both far above N≥30. → **CALIBRATED.** The model is worth
+  spending forward fill-honest time on. This is the first "the model isn't broken" evidence in the
+  15m lane, delivered in days by the retro accelerate.
+- **Honest caveats (do NOT read this as "proven"):**
+  1. **t1 FAILS** — 1 min before close the market is near-perfectly informed (Brier 0.027); the GBM
+     can't compete. **Usable horizon is t2–t5, not the final minute** — any forward S2 rests should
+     carry ≥2 min TTE, never the last minute.
+  2. **t5 is a slack-pass** (model marginally *worse* than market, inside tolerance); the genuine
+     edge is at **t2**. Don't oversell t5.
+  3. **5 days / one BTC regime.** N is high because the product is dense (96/day), but this is a
+     single week's volatility regime. CALIBRATED ≠ regime-robust. Re-run after a different regime,
+     or treat forward as the regime test.
+  4. **~$6 Coinbase-vs-BRTI basis is uncorrected** — the model PASSES despite it, so de-biasing is
+     upside; do it before/during forward S2 (measure spot against a BRTI-consistent reference).
+- **Scope reminder:** CALIBRATED does NOT open S2. It clears 1 of 3 locks. The fill-honest P&L
+  (execution realism — forward-bound, un-accelerable) and Brooks's in-session yes remain.
 
 ---
 _Retrospective, paper, $0. No orders. Does not open S2 or touch the daily lane._
